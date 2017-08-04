@@ -17,7 +17,33 @@ class GameScene: SKScene {
     private var lastUpdateTime : TimeInterval = 0
     private var label : SKLabelNode?
     private var spinnyNode : SKShapeNode?
+   
     
+    
+    let hero = SKSpriteNode(imageNamed: "Spaceship")
+    
+    
+    
+    override func didMove(to view: SKView) {
+        
+        backgroundColor = SKColor.black
+        
+        
+        let xCoord = size.width * 0.5
+        let yCoord = size.height * 0.5
+        
+        hero.size.height = 50
+        hero.size.width = 50
+        
+        hero.position = CGPoint(x: xCoord, y: yCoord)
+        
+        addChild(hero)
+        
+        
+    }
+    
+    
+
     override func sceneDidLoad() {
 
         self.lastUpdateTime = 0
@@ -30,17 +56,17 @@ class GameScene: SKScene {
         }
         
         // Create shape node to use during mouse interaction
-        let w = (self.size.width + self.size.height) * 0.05
-        self.spinnyNode = SKShapeNode.init(rectOf: CGSize.init(width: w, height: w), cornerRadius: w * 0.3)
+       // let w = (self.size.width + self.size.height) * 0.05
+     //   self.spinnyNode = SKShapeNode.init(rectOf: CGSize.init(width: w, height: w), cornerRadius: w * 0.3)
         
-        if let spinnyNode = self.spinnyNode {
-            spinnyNode.lineWidth = 2.5
-            
-            spinnyNode.run(SKAction.repeatForever(SKAction.rotate(byAngle: CGFloat(Double.pi), duration: 1)))
-            spinnyNode.run(SKAction.sequence([SKAction.wait(forDuration: 0.5),
-                                              SKAction.fadeOut(withDuration: 0.5),
-                                              SKAction.removeFromParent()]))
-        }
+      //  if let spinnyNode = self.spinnyNode {
+         //   spinnyNode.lineWidth = 2.5
+        //
+            //spinnyNode.run(SKAction.repeatForever(SKAction.rotate(byAngle: CGFloat(Double.pi), duration: 1)))
+           // spinnyNode.run(SKAction.sequence([SKAction.wait(forDuration: 0.5),
+                                             // SKAction.fadeOut(withDuration: 0.5),
+                                             // SKAction.removeFromParent()]))
+       // }
     }
     
     
@@ -69,9 +95,7 @@ class GameScene: SKScene {
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if let label = self.label {
-            label.run(SKAction.init(named: "Pulse")!, withKey: "fadeInOut")
-        }
+        
         
         for t in touches { self.touchDown(atPoint: t.location(in: self)) }
     }
@@ -81,7 +105,32 @@ class GameScene: SKScene {
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        
+        let bullet = SKSpriteNode()
+        
+        bullet.color = UIColor.blue
+        
+        bullet.size = CGSize(width: 5, height: 5)
+        
+        bullet.position = CGPoint(x: hero.position.x, y: hero.position.y)
+        
+        addChild(bullet)
+        
+        guard let touch = touches.first else { return }
+        
+        let touchLocation = touch.location(in: self)
+        
+        let vector = CGVector(dx: -(hero.position.x - touchLocation.x), dy: -(hero.position.y - touchLocation.y))
+        
         for t in touches { self.touchUp(atPoint: t.location(in: self)) }
+        
+        let projectileAction = SKAction.sequence([
+            SKAction.repeat(
+                SKAction.move(by: vector, duration: 0.5), count: 10
+                //SKAction.wait (forDuration: 0.5),
+                //SKAction.removeFromParent()
+            )])
+        bullet.run(projectileAction)
     }
     
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
